@@ -9,31 +9,26 @@ services:
       - "8080:80"
     volumes:
       - ./data:/usr/share/nginx/html
-    command: >
-      bash -c "
-      apt-get update && apt-get install -y git && 
-      git clone https://github.com/TC130/puzzle.git /usr/share/nginx/html && 
-      echo 'server {
-          listen 80;
-          server_name localhost;
+    command: bash -c 'apt-get update && apt-get install -y git && git clone https://github.com/TC130/puzzle.git /usr/share/nginx/html && printf "server {
+    listen 80;
+    server_name localhost;
 
-          root /usr/share/nginx/html;
-          index index.html;
+    root /usr/share/nginx/html;
+    index index.html;
 
-          location / {
-              try_files $uri $uri/ /index.html;
-          }
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 
-          location ~* \.(jpg|jpeg|png|gif|css|js|ico)$ {
-              expires 1y;
-              add_header Cache-Control "public, no-transform"; 
-          }
+    location ~* \\.(jpg|jpeg|png|gif|css|js|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, no-transform";
+    }
 
-          server_tokens off;
-          client_max_body_size 10M;
-      }' > /etc/nginx/conf.d/default.conf && 
-      nginx -g 'daemon off;'
-      "
+    server_tokens off;
+    client_max_body_size 10M;
+}
+" > /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 30s
