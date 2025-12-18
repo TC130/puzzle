@@ -7,11 +7,30 @@ RUN apk add --no-cache git
 # 从GitHub仓库克隆代码
 RUN git clone https://github.com/TC130/puzzle.git /usr/share/nginx/html
 
-# 切换到代码目录
-WORKDIR /usr/share/nginx/html
+# 创建nginx配置文件
+RUN echo 'server {
+    listen 80;
+    server_name localhost;
 
-# 复制配置文件
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 静态文件缓存配置
+    location ~* \\.(jpg|jpeg|png|gif|css|js|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    # 禁用服务器版本号
+    server_tokens off;
+
+    # 限制请求体大小
+    client_max_body_size 10M;
+}' > /etc/nginx/conf.d/default.conf
 
 # 暴露80端口
 EXPOSE 80
