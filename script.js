@@ -316,7 +316,7 @@ class PuzzleGame {
             if (!isUsed) {
                 const pieceElement = document.createElement('div');
                 pieceElement.className = 'puzzle-piece';
-                pieceElement.draggable = true;
+                pieceElement.setAttribute('draggable', 'true');
                 if (this.selectedPiece && this.selectedPiece.id === piece.id) {
                     pieceElement.classList.add('selected');
                 }
