@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童拼图游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧩 拼图游戏 🧩</h1>
+            <div class="game-controls">
+                <button class="btn" id="newGameBtn">新游戏</button>
+                <select id="difficultySelect" class="btn">
+                <option value="easy" selected>简单 (4块) 👶</option>
+                <option value="hard">困难 (9块)</option>
+            </select>
+                <select id="puzzleSelect" class="btn">
+                    <!-- 选项将根据难度动态加载 -->
+                </select>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="puzzle-board" id="puzzleBoard">
+                <!-- 拼图网格将在这里生成 -->
+            </div>
+            
+            <div class="puzzle-pieces" id="puzzlePieces">
+                <!-- 拼图块将在这里生成 -->
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

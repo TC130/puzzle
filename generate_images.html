@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成拼图图片</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            margin: 10px;
+            display: block;
+        }
+        .preview {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>生成拼图图片</h1>
+        <p>点击按钮生成图片，然后右键点击图片保存到 images 文件夹</p>
+        
+        <button onclick="generate4Piece()">生成 4块拼图（400x400）</button>
+        <button onclick="generate6Piece()">生成 6块拼图（600x400）</button>
+        <button onclick="generate9Piece()">生成 9块拼图（600x600）</button>
+        
+        <div id="preview"></div>
+    </div>
+
+    <script>
+        // 绘制适合4块拼图的卡通动物（2x2 = 400x400，每块200x200）
+        function draw4PieceAnimal(ctx, width, height) {
+            // 背景色 - 淡蓝色天空
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#e8f4f8');
+            gradient.addColorStop(1, '#d0e8f0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            // 绘制一个可爱的熊猫，确保每一块都有内容
+            
+            // 左上角（0,0）：头部上部
+            // 熊猫头部
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(width * 0.5, height * 0.4, width * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左耳（左上角）
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(width * 0.25, height * 0.25, width * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 右耳（右上角）
+            ctx.beginPath();
+            ctx.arc(width * 0.75, height * 0.25, width * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左眼斑（左上角区域）
+            ctx.beginPath();
+            ctx.ellipse(width * 0.35, height * 0.35, width * 0.1, width * 0.12, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 右眼斑（右上角区域）
+            ctx.beginPath();
+            ctx.ellipse(width * 0.65, height * 0.35, width * 0.1, width * 0.12, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼睛高光（左上和右上都有）
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(width * 0.35, height * 0.35, width * 0.03, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(width * 0.65, height * 0.35, width * 0.03, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左下角（0,1）：身体左部
+            // 熊猫身体
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.4, height * 0.75, width * 0.25, height * 0.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左手臂（左下角）
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.2, height * 0.7, width * 0.1, height * 0.15, -0.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左腿（左下角）
+            ctx.beginPath();
+            ctx.ellipse(width * 0.35, height * 0.9, width * 0.12, height * 0.08, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 右下角（1,1）：身体右部
+            // 右手臂（右下角）
+            ctx.beginPath();
+            ctx.ellipse(width * 0.8, height * 0.7, width * 0.1, height * 0.15, 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 右腿（右下角）
+            ctx.beginPath();
+            ctx.ellipse(width * 0.65, height * 0.9, width * 0.12, height * 0.08, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 鼻子（中心，跨多个区域）
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.5, height * 0.5, width * 0.04, width * 0.03, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 嘴巴（中心下方）
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(width * 0.5, height * 0.55, width * 0.06, 0, Math.PI);
+            ctx.stroke();
+            
+            // 添加一些细节确保每块都有内容
+            // 肚子上的阴影（左下和右下）
+            ctx.fillStyle = '#f0f0f0';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.5, height * 0.75, width * 0.2, height * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 绘制适合6块拼图的卡通动物（3x2 = 600x400，每块200x200）
+        function draw6PieceAnimal(ctx, width, height) {
+            // 背景色 - 渐变天空
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#87ceeb');
+            gradient.addColorStop(1, '#e0f6ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            // 绘制一个长颈鹿，确保每一块都有内容（3列x2行）
+            
+            // 第一列：头部和脖子
+            // 头部（第1列，第1行）
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.16, height * 0.25, width * 0.12, height * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 左耳（第1列，第1行）
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.ellipse(width * 0.12, height * 0.18, width * 0.04, height * 0.06, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(width * 0.16, height * 0.16, width * 0.035, height * 0.055, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼睛（第1列，第1行）
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(width * 0.15, height * 0.25, width * 0.015, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 脖子（第1列，第2行）
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(width * 0.1, height * 0.5, width * 0.12, height * 0.45);
+            
+            // 脖子上的斑点（第1列，第2行）
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(width * 0.12, height * 0.6, width * 0.06, height * 0.08);
+            ctx.fillRect(width * 0.11, height * 0.75, width * 0.05, height * 0.06);
+            
+            // 第二列：身体上部
+            // 身体上部（第2列，第1行）
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(width * 0.4, height * 0.2, width * 0.25, height * 0.3);
+            
+            // 身体上的斑点（第2列，第1行）
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(width * 0.45, height * 0.25, width * 0.08, height * 0.1);
+            ctx.fillRect(width * 0.52, height * 0.3, width * 0.1, height * 0.12);
+            
+            // 连接脖子的部分（第2列，第1行）
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(width * 0.28, height * 0.35, width * 0.15, height * 0.15);
+            
+            // 第三列：身体下部和腿部
+            // 身体下部（第3列，第1行）
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(width * 0.7, height * 0.25, width * 0.25, height * 0.25);
+            
+            // 身体上的斑点（第3列，第1行）
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(width * 0.72, height * 0.3, width * 0.1, height * 0.1);
+            ctx.fillRect(width * 0.8, height * 0.28, width * 0.08, height * 0.12);
+            
+            // 后腿上部（第3列，第2行）
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(width * 0.75, height * 0.5, width * 0.15, height * 0.2);
+            
+            // 后腿下部（第3列，第2行）
+            ctx.fillRect(width * 0.78, height * 0.7, width * 0.1, height * 0.25);
+            
+            // 前腿（第2列，第2行）
+            ctx.fillRect(width * 0.42, height * 0.5, width * 0.1, height * 0.45);
+            
+            // 前腿上的斑点（第2列，第2行）
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(width * 0.44, height * 0.6, width * 0.05, height * 0.08);
+            
+            // 尾巴（第3列，第2行，上方）
+            ctx.strokeStyle = '#8b4513';
+            ctx.lineWidth = width * 0.04;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(width * 0.88, height * 0.25);
+            ctx.lineTo(width * 0.95, height * 0.15);
+            ctx.stroke();
+            
+            // 尾巴尖的毛（第3列，第1行）
+        ctx.fillStyle = '#8b4513';
+        ctx.beginPath();
+        ctx.arc(width * 0.95, height * 0.15, width * 0.03, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // 绘制适合9块拼图的卡通动物（3x3 = 600x600，每块200x200）
+    function draw9PieceAnimal(ctx, width, height) {
+        // 背景色 - 渐变森林
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#90ee90');
+        gradient.addColorStop(1, '#228b22');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // 绘制一个可爱的兔子，确保每一块都有内容（3列x3行）
+        
+        // 头部（第2列，第1行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(width * 0.5, height * 0.3, width * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 左耳（第1列，第1行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.3, height * 0.2, width * 0.1, height * 0.25, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 左耳内部（第1列，第1行）
+        ctx.fillStyle = '#ffb6c1';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.3, height * 0.2, width * 0.06, height * 0.18, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 右耳（第3列，第1行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.7, height * 0.2, width * 0.1, height * 0.25, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 右耳内部（第3列，第1行）
+        ctx.fillStyle = '#ffb6c1';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.7, height * 0.2, width * 0.06, height * 0.18, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 左眼（第1-2列，第1-2行）
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(width * 0.42, height * 0.3, width * 0.05, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 右眼（第2-3列，第1-2行）
+        ctx.beginPath();
+        ctx.arc(width * 0.58, height * 0.3, width * 0.05, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 鼻子（第2列，第2行）
+        ctx.fillStyle = '#ff69b4';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.5, height * 0.38, width * 0.06, width * 0.04, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 嘴巴（第2列，第2行）
+        ctx.strokeStyle = '#ff69b4';
+        ctx.lineWidth = width * 0.02;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(width * 0.5, height * 0.4);
+        ctx.lineTo(width * 0.5, height * 0.45);
+        ctx.stroke();
+        
+        // 身体（第2列，第2-3行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.5, height * 0.65, width * 0.3, height * 0.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 前腿（第1-2列，第3行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.35, height * 0.85, width * 0.08, height * 0.15, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 前腿（第2-3列，第3行）
+        ctx.beginPath();
+        ctx.ellipse(width * 0.65, height * 0.85, width * 0.08, height * 0.15, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 后腿（第1列，第3行）
+        ctx.beginPath();
+        ctx.ellipse(width * 0.25, height * 0.75, width * 0.08, height * 0.15, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 后腿（第3列，第3行）
+        ctx.beginPath();
+        ctx.ellipse(width * 0.75, height * 0.75, width * 0.08, height * 0.15, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 尾巴（第3列，第2-3行）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(width * 0.85, height * 0.6, width * 0.1, Math.PI * 0.5, Math.PI * 1.5);
+        ctx.fill();
+        ctx.fillRect(width * 0.78, height * 0.5, width * 0.07, width * 0.2);
+        
+        // 添加一些细节确保每块都有内容
+        // 草地上的小花（第1列，第3行）
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(width * 0.15, height * 0.9, width * 0.03, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 草地上的小花（第3列，第3行）
+        ctx.beginPath();
+        ctx.arc(width * 0.85, height * 0.9, width * 0.03, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function generate4Piece() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 400;
+            canvas.style.border = '2px solid #ddd';
+            canvas.style.margin = '10px';
+            canvas.style.display = 'block';
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            const ctx = canvas.getContext('2d');
+            draw4PieceAnimal(ctx, 400, 400);
+            
+            // 显示预览
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '<h2>✅ 4块拼图已生成！</h2><p>图片应该已自动下载，如果没有，请右键点击下面的图片选择"图片另存为"，保存为 panda_4pieces.png 到 images 文件夹</p>';
+            preview.appendChild(canvas);
+            
+            // 自动下载
+            try {
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'panda_4pieces.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert('图片生成失败，请右键点击预览图片手动保存');
+                    }
+                }, 'image/png');
+            } catch(e) {
+                console.error('下载失败:', e);
+                alert('自动下载失败，请右键点击预览图片手动保存为 panda_4pieces.png');
+            }
+        }
+
+        function generate6Piece() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 400;
+            canvas.style.border = '2px solid #ddd';
+            canvas.style.margin = '10px';
+            canvas.style.display = 'block';
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            const ctx = canvas.getContext('2d');
+            draw6PieceAnimal(ctx, 600, 400);
+            
+            // 显示预览
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '<h2>✅ 6块拼图已生成！</h2><p>图片应该已自动下载，如果没有，请右键点击下面的图片选择"图片另存为"，保存为 giraffe_6pieces.png 到 images 文件夹</p>';
+            preview.appendChild(canvas);
+            
+            // 自动下载
+            try {
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'giraffe_6pieces.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert('图片生成失败，请右键点击预览图片手动保存');
+                    }
+                }, 'image/png');
+            } catch(e) {
+                console.error('下载失败:', e);
+                alert('自动下载失败，请右键点击预览图片手动保存为 giraffe_6pieces.png');
+            }
+        }
+
+        function generate9Piece() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 600;
+            canvas.style.border = '2px solid #ddd';
+            canvas.style.margin = '10px';
+            canvas.style.display = 'block';
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            const ctx = canvas.getContext('2d');
+            draw9PieceAnimal(ctx, 600, 600);
+            
+            // 显示预览
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '<h2>✅ 9块拼图已生成！</h2><p>图片应该已自动下载，如果没有，请右键点击下面的图片选择"图片另存为"，保存为 rabbit_9pieces.png 到 images 文件夹</p>';
+            preview.appendChild(canvas);
+            
+            // 自动下载
+            try {
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'rabbit_9pieces.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert('图片生成失败，请右键点击预览图片手动保存');
+                    }
+                }, 'image/png');
+            } catch(e) {
+                console.error('下载失败:', e);
+                alert('自动下载失败，请右键点击预览图片手动保存为 rabbit_9pieces.png');
+            }
+        }
+    </script>
+</body>
+</html>
+
