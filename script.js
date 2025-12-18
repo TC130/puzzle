@@ -284,6 +284,11 @@ class PuzzleGame {
                 }
             }
             
+            // 添加拖拽事件监听器
+            cellElement.addEventListener('dragover', (e) => this.handleDragOver(e));
+            cellElement.addEventListener('dragenter', (e) => this.handleDragEnter(e));
+            cellElement.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+            cellElement.addEventListener('drop', (e) => this.handleDrop(e, index));
             cellElement.addEventListener('click', () => this.handleCellClick(index));
             board.appendChild(cellElement);
         });
@@ -311,6 +316,7 @@ class PuzzleGame {
             if (!isUsed) {
                 const pieceElement = document.createElement('div');
                 pieceElement.className = 'puzzle-piece';
+                pieceElement.draggable = true;
                 if (this.selectedPiece && this.selectedPiece.id === piece.id) {
                     pieceElement.classList.add('selected');
                 }
@@ -326,6 +332,15 @@ class PuzzleGame {
                 pieceElement.style.backgroundRepeat = 'no-repeat';
                 
                 pieceElement.dataset.pieceId = piece.id;
+                
+                // 添加拖拽事件监听器
+                pieceElement.addEventListener('dragstart', (e) => this.handleDragStart(e, piece));
+                pieceElement.addEventListener('dragend', (e) => this.handleDragEnd(e));
+                
+                // 添加触摸事件监听器（支持pad设备）
+                pieceElement.addEventListener('touchstart', (e) => this.handleTouchStart(e, piece));
+                pieceElement.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+                pieceElement.addEventListener('touchend', (e) => this.handleTouchEnd(e));
                 
                 pieceElement.addEventListener('click', () => this.handlePieceClick(piece));
                 piecesContainer.appendChild(pieceElement);
@@ -423,6 +438,129 @@ class PuzzleGame {
             setTimeout(() => {
                 messageEl.classList.remove('success');
             }, 3000);
+        }
+    }
+    
+    // 拖拽事件处理方法
+    handleDragStart(e, piece) {
+        // 设置拖拽数据
+        e.dataTransfer.setData('text/plain', piece.id);
+        this.selectedPiece = piece;
+        
+        // 添加拖拽时的样式
+        e.target.classList.add('dragging');
+        
+        // 设置拖拽效果
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    handleDragEnd(e) {
+        // 移除拖拽时的样式
+        e.target.classList.remove('dragging');
+        this.selectedPiece = null;
+    }
+    
+    handleDragOver(e) {
+        // 阻止默认行为，允许放置
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+    
+    handleDragEnter(e) {
+        // 阻止默认行为
+        e.preventDefault();
+        // 添加拖拽进入时的样式
+        if (e.target.classList.contains('puzzle-cell')) {
+            e.target.classList.add('drag-over');
+        }
+    }
+    
+    handleDragLeave(e) {
+        // 移除拖拽进入时的样式
+        if (e.target.classList.contains('puzzle-cell')) {
+            e.target.classList.remove('drag-over');
+        }
+    }
+    
+    handleDrop(e, cellIndex) {
+        // 阻止默认行为
+        e.preventDefault();
+        
+        // 移除拖拽进入时的样式
+        e.target.classList.remove('drag-over');
+        
+        // 获取拖拽的拼图块ID
+        const pieceId = parseInt(e.dataTransfer.getData('text/plain'));
+        
+        // 查找对应的拼图块
+        const piece = this.puzzlePieces.find(p => p.id === pieceId);
+        if (piece) {
+            // 放置拼图块
+            this.placePiece(cellIndex, piece);
+        }
+    }
+    
+    // 触摸事件处理方法（支持pad设备）
+    handleTouchStart(e, piece) {
+        // 记录触摸起始位置
+        this.touchStartX = e.touches[0].clientX;
+        this.touchStartY = e.touches[0].clientY;
+        this.selectedPiece = piece;
+        this.touchPieceElement = e.target;
+        
+        // 添加拖拽时的样式
+        e.target.classList.add('dragging');
+    }
+    
+    handleTouchMove(e) {
+        if (this.selectedPiece) {
+            // 计算触摸移动距离
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+            const deltaX = touchX - this.touchStartX;
+            const deltaY = touchY - this.touchStartY;
+            
+            // 移动拼图块
+            this.touchPieceElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            this.touchPieceElement.style.position = 'absolute';
+            this.touchPieceElement.style.zIndex = '1000';
+            
+            // 阻止页面滚动
+            e.preventDefault();
+        }
+    }
+    
+    handleTouchEnd(e) {
+        if (this.selectedPiece && this.touchPieceElement) {
+            // 移除拖拽时的样式
+            this.touchPieceElement.classList.remove('dragging');
+            this.touchPieceElement.style.transform = '';
+            this.touchPieceElement.style.position = '';
+            this.touchPieceElement.style.zIndex = '';
+            
+            // 查找触摸结束位置对应的拼图插槽
+            const touchX = e.changedTouches[0].clientX;
+            const touchY = e.changedTouches[0].clientY;
+            
+            // 获取所有拼图插槽
+            const cells = document.querySelectorAll('.puzzle-cell');
+            let targetCell = null;
+            
+            // 检查触摸结束位置是否在某个插槽内
+            cells.forEach((cell, index) => {
+                const rect = cell.getBoundingClientRect();
+                if (touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom) {
+                    targetCell = index;
+                }
+            });
+            
+            // 如果触摸结束位置在某个插槽内，放置拼图块
+            if (targetCell !== null) {
+                this.placePiece(targetCell, this.selectedPiece);
+            }
+            
+            this.selectedPiece = null;
+            this.touchPieceElement = null;
         }
     }
 }

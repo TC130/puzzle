@@ -130,6 +130,13 @@ select.btn {
     border-width: 3px;
 }
 
+.puzzle-cell.drag-over {
+    background: #e7f3ff;
+    border-color: #667eea;
+    border-width: 3px;
+    border-style: solid;
+}
+
 .puzzle-cell.filled {
     border: 2px solid #4ecdc4;
 }
@@ -138,6 +145,13 @@ select.btn {
     border: 2px solid #51cf66;
     background: #d3f9d8;
     animation: correctPulse 0.5s ease;
+}
+
+/* 拖拽中的拼图块样式 */
+.puzzle-piece.dragging {
+    opacity: 0.5;
+    transform: scale(1.2);
+    z-index: 1000;
 }
 
 .puzzle-piece {
