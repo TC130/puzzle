@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   puzzle:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: puzzle-game
     restart: always
     ports:
@@ -10,8 +10,8 @@ services:
     volumes:
       - ./data:/usr/share/nginx/html
     command: >
-      sh -c "
-      apk add --no-cache git && 
+      bash -c "
+      apt-get update && apt-get install -y git && 
       git clone https://github.com/TC130/puzzle.git /usr/share/nginx/html && 
       echo 'server {
           listen 80;
@@ -24,9 +24,9 @@ services:
               try_files $uri $uri/ /index.html;
           }
 
-          location ~* \\.(jpg|jpeg|png|gif|css|js|ico)$ {
+          location ~* \.(jpg|jpeg|png|gif|css|js|ico)$ {
               expires 1y;
-              add_header Cache-Control \"public, no-transform\"; 
+              add_header Cache-Control "public, no-transform"; 
           }
 
           server_tokens off;
