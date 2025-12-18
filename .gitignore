@@ -4,10 +4,6 @@ node_modules/
 # Git目录
 .git/
 
-# Docker相关文件
-Dockerfile
-nginx.conf
-
 # 日志文件
 *.log
 
